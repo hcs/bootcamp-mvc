@@ -48,32 +48,29 @@ class ProcReporter(object):
             if is_exposed(name):
                 links.append(name)
         content = "<br/>".join([format_link(l,l) for l in links])
-        return render_template({"title":"Index", "content": content})
+        return ("<html><head><title>Index</title><head><body><h2>Index</h2>"
+                "%s</body></html>"
+                % content)
 
     @cherrypy.expose
     def ps(self):
-        procs = list_procs()
-        d = {"title":"Running processes", "content": format_html_list(procs)}
-        return render_template(d)
+        # get a list of the running processes (examine the rest of the code),
+        # format it into HTML, and display it.
+        return "Implement me (ps)"
 
     @cherrypy.expose
     def hostname(self):
-        hostname = socket.gethostname()
-        return render_template({"title":"Hostname",
-                                "content": html_escape(hostname)})
+        # get the hostname somehow, and pass it to the template rendering
+        # function.
+        return "Implement me (hostname)"
 
     @cherrypy.expose
     def schedule(self, classname=None):
-        d = load_schedule()
-        if classname is None:
-            content = format_html_list([format_schedule_item(k,v)
-                                        for k,v in d.iteritems()], False)
-        else:
-            content = (format_schedule_item(classname, d[classname])
-                       if classname in d else "Could not find that class.")
-        return render_template({"title":"Schedule", "content":content})
+        # Display the schedule in an unordered list or in a table.
+        # If classname is none, display everything. If the classname is
+        # specified, only display the specified class.
+        return "Implement me (schedule)"
         
-
 
 def list_procs():
     if os.name == 'nt':
@@ -81,36 +78,36 @@ def list_procs():
     return list_procs_nix()
 
 def list_procs_nt():
-    return []
+    get_list_from_procs(["tasklist"])
 
 def list_procs_nix():
-    proc = subprocess.Popen(["/bin/ps", "-a"], stdout=subprocess.PIPE,
+    get_list_from_proc(["/bin/ps", "-a"])
+
+def get_list_from_proc(args):
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
     out,_ = proc.communicate()
     return out.split("\n")[1:-1]
 
 def html_escape(s):
-    return s.replace("<","&lt;").replace(">","&gt;")
+    return s.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
 
 def safe_string_format(tmpl, args):
     return tmpl % tuple(map(html_escape, args))
 
 def format_html_list(rg,safe=True):
-    to_join = ["<ul>"]
-    for ele in rg:
-        to_fmt = html_escape(ele) if safe else ele
-        to_join.append(" "*4 + "<li>%s</li>" % to_fmt)
-    to_join.append("</ul>")
-    return "\n".join(to_join)
+    # convert a list of strings to HTML markup for an unordered list (ul).
+    # if safe is true, the contents of the list items must be html escaped.
+    return "Implement me (format_html_list)!"
 
 def format_link(href, text):
     return safe_string_format('<a href="%s">%s</a>', (href,text))
 
 def render_template(dictFields):
     required = ("title","content","footer",)
-    for key in [key for key in required if key not in dictFields]:
-        dictFields[key] = ""
-    return TEMPLATE % dictFields
+    # Fill in the values in the TEMPLATE string using the values in dictFields.
+    # If no value is found in the dictionary, use the empty string.
+    return None
 
 # CSV-related functions
 

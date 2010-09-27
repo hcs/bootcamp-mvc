@@ -52,18 +52,22 @@ class ProcReporter(object):
 
     @cherrypy.expose
     def ps(self):
-        procs = list_procs()
-        d = {"title":"Running processes", "content": format_html_list(procs)}
+        # get a list of the running processes (examine the rest of the code),
+        # format it into HTML, and display it.
+        d = {"title":"Running processes", "content": "List HTML here."}
         return render_template(d)
 
     @cherrypy.expose
     def hostname(self):
-        hostname = socket.gethostname()
+        # get the hostname somehow, and pass it to the template rendering
+        # function.
         return render_template({"title":"Hostname",
-                                "content": html_escape(hostname)})
+                                "content": "PUT HOSTNAME HERE"})
 
     @cherrypy.expose
     def schedule(self, classname=None):
+        # for bonus points, display this data in an HTML table instead of
+        # a list.
         d = load_schedule()
         if classname is None:
             content = format_html_list([format_schedule_item(k,v)
@@ -74,17 +78,19 @@ class ProcReporter(object):
         return render_template({"title":"Schedule", "content":content})
         
 
-
 def list_procs():
     if os.name == 'nt':
         return list_procs_nt()
     return list_procs_nix()
 
 def list_procs_nt():
-    return []
+    get_list_from_procs(["tasklist"])
 
 def list_procs_nix():
-    proc = subprocess.Popen(["/bin/ps", "-a"], stdout=subprocess.PIPE,
+    get_list_from_proc(["/bin/ps", "-a"])
+
+def get_list_from_proc(args):
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
     out,_ = proc.communicate()
     return out.split("\n")[1:-1]
